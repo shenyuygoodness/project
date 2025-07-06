@@ -1,131 +1,131 @@
+// threadMode.dart
 class ThreatModel {
-  int? count;
-  String? next;
-  String? previous;
-  List<ThreatResult>? results;
+  final String? indicator;
+  final String? type;
+  final String? risk;
+  final String? riskLevel;
+  final String? stampSeen;
+  final String? stampUpdated;
+  final String? stampAdded;
+  final String? description;
+  final String? wikisummary;
+  final String? threat;
+  final String? category;
+  final List<String>? othernames;
 
-  ThreatModel({this.count, this.next, this.previous, this.results});
-
-  ThreatModel.fromJson(Map<String, dynamic> json) {
-    count = json['count'];
-    next = json['next'];
-    previous = json['previous'];
-    if (json['results'] != null) {
-      results = <ThreatResult>[];
-      json['results'].forEach((v) {
-        results!.add(ThreatResult.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['count'] = this.count;
-    data['next'] = this.next;
-    data['previous'] = this.previous;
-    if (this.results != null) {
-      data['results'] = this.results!.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
-}
-
-class ThreatResult {
-  int? tid;
-  String? threat;
-  String? category;
-  List<String>? othernames;
-  String? risk;
-  String? description;
-  String? notes;
-  String? wikisummary;
-  String? wikireference;
-  String? retired;
-  String? stampAdded;
-  String? stampUpdated;
-  String? stampSeen;
-  String? stampRetired;
-  String? updatedLastDomain;
-  List<dynamic>? related;
-  Map<String, List<String>>? attributes;
-  List<dynamic>? ttps;
-  List<Map<String, dynamic>>? news;
-  List<Map<String, dynamic>>? comments;
-  Map<String, dynamic>? summary;
-
-  ThreatResult({
-    this.tid,
+  ThreatModel({
+    this.indicator,
+    this.type,
+    this.risk,
+    this.riskLevel,
+    this.stampSeen,
+    this.stampUpdated,
+    this.stampAdded,
+    this.description,
     this.threat,
     this.category,
     this.othernames,
+    this.wikisummary,
+  });
+
+  factory ThreatModel.fromJson(Map<String, dynamic> json) {
+    return ThreatModel(
+      indicator: json['indicator'],
+      type: json['type'],
+      risk: json['risk'],
+      riskLevel: json['risk_level'],
+      stampSeen: json['stamp_seen'],
+      stampUpdated: json['stamp_updated'],
+      stampAdded: json['stamp_added'],
+      description: json['description'],
+      wikisummary: json['wikisummary'],
+      threat: json['threat'],
+      category: json['category'],
+      othernames: json['othernames'] != null
+          ? List<String>.from(json['othernames'])
+          : [],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'indicator': indicator,
+      'type': type,
+      'risk': risk,
+      'risk_level': riskLevel,
+      'stamp_seen': stampSeen,
+      'stamp_updated': stampUpdated,
+      'stamp_added': stampAdded,
+      'description': description,
+      'threat': threat,
+      'category': category,
+      'othernames': othernames,
+      'wikisummary': wikisummary,
+    };
+  }
+}
+
+// Basic threat info (from explore endpoint)
+class BasicThreat {
+  final int tid;
+  final String threat;
+  final String? category;
+  final String? risk;
+
+  BasicThreat({
+    required this.tid,
+    required this.threat,
+    this.category,
+    this.risk,
+  });
+
+  factory BasicThreat.fromJson(Map<String, dynamic> json) {
+    return BasicThreat(
+      tid: json['tid'],
+      threat: json['threat'],
+      category: json['category'],
+      risk: json['risk'],
+    );
+  }
+}
+
+// Detailed threat info (from info endpoint)
+class DetailedThreat {
+  final int tid;
+  final String threat;
+  final String? category;
+  final String? risk;
+  final String? description;
+  final String? notes;
+  final String? wikisummary;
+  final List<String>? othernames;
+  final String? stampUpdated;
+
+  DetailedThreat({
+    required this.tid,
+    required this.threat,
+    this.category,
     this.risk,
     this.description,
     this.notes,
     this.wikisummary,
-    this.wikireference,
-    this.retired,
-    this.stampAdded,
+    this.othernames,
     this.stampUpdated,
-    this.stampSeen,
-    this.stampRetired,
-    this.updatedLastDomain,
-    this.related,
-    this.attributes,
-    this.ttps,
-    this.news,
-    this.comments,
-    this.summary,
   });
 
-  ThreatResult.fromJson(Map<String, dynamic> json) {
-    tid = json['tid'];
-    threat = json['threat'];
-    category = json['category'];
-    othernames = json['othernames'] != null ? List<String>.from(json['othernames']) : [];
-    risk = json['risk'];
-    description = json['description'];
-    notes = json['notes'];
-    wikisummary = json['wikisummary'];
-    wikireference = json['wikireference'];
-    retired = json['retired'];
-    stampAdded = json['stamp_added'];
-    stampUpdated = json['stamp_updated'];
-    stampSeen = json['stamp_seen'];
-    stampRetired = json['stamp_retired'];
-    updatedLastDomain = json['updated_last_domain'];
-    related = json['related'];
-    attributes = json['attributes'] != null
-        ? Map<String, List<String>>.from(json['attributes'])
-        : <String, List<String>>{};
-    ttps = json['ttps'];
-    news = json['news'] != null ? List<Map<String, dynamic>>.from(json['news']) : [];
-    comments = json['comments'] != null ? List<Map<String, dynamic>>.from(json['comments']) : [];
-    summary = json['summary'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['tid'] = this.tid;
-    data['threat'] = this.threat;
-    data['category'] = this.category;
-    data['othernames'] = this.othernames;
-    data['risk'] = this.risk;
-    data['description'] = this.description;
-    data['notes'] = this.notes;
-    data['wikisummary'] = this.wikisummary;
-    data['wikireference'] = this.wikireference;
-    data['retired'] = this.retired;
-    data['stamp_added'] = this.stampAdded;
-    data['stamp_updated'] = this.stampUpdated;
-    data['stamp_seen'] = this.stampSeen;
-    data['stamp_retired'] = this.stampRetired;
-    data['updated_last_domain'] = this.updatedLastDomain;
-    data['related'] = this.related;
-    data['attributes'] = this.attributes;
-    data['ttps'] = this.ttps;
-    data['news'] = this.news;
-    data['comments'] = this.comments;
-    data['summary'] = this.summary;
-    return data;
+  factory DetailedThreat.fromJson(Map<String, dynamic> json) {
+    return DetailedThreat(
+      tid: json['tid'],
+      threat: json['threat'],
+      category: json['category'],
+      risk: json['risk'],
+      description: json['description'],
+      notes: json['notes'],
+      wikisummary: json['wikisummary'],
+      othernames: json['othernames'] != null
+          ? List<String>.from(json['othernames'])
+          : null,
+      stampUpdated: json['stamp_updated'],
+    );
   }
 }
