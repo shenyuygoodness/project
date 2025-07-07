@@ -12,7 +12,9 @@ class CustomTextFormField extends StatelessWidget {
     required this.hintText,
     this.isObscure = false,
     this.enabled = true,
-    this.label,
+    this.label, 
+    required bool obscureText, 
+    required String? Function(dynamic value) validator,
   });
 
   // final textController = TextEditingController();

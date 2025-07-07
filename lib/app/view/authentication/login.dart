@@ -143,14 +143,14 @@ class _LoginState extends State<Login> {
               CustomTextFormField(
                 textController: emailController,
                 hintText: "Email",
-                enabled: !_isLoading, // Disable input when loading
+                enabled: !_isLoading, obscureText: false, validator: (value) {  }, // Disable input when loading
               ),
               const SizedBox(height: 30),
               CustomTextFormField(
                 textController: passwordController,
                 hintText: "Password",
                 isObscure: true, // Typically passwords should be obscured
-                enabled: !_isLoading, // Disable input when loading
+                enabled: !_isLoading, obscureText: false, validator: (value) {  }, // Disable input when loading
               ),
               const SizedBox(height: 30),
               _isLoading // <--- NEW: Show CircularProgressIndicator when loading
