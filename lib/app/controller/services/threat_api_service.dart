@@ -4,144 +4,101 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:project/app/model/threat_model.dart';
 
-// class ThreatService {
-//   static const String baseUrl = 'https://pulsedive.com/api/info.php';
-//   static const String apiKey =
-//       'ed7c4a81552db612cd085eb20a9dbedec25a20f2a10d6a9d626bfe1e6c321c6a';
-
-//   Future<ThreatModel> fetchThreats() async {
-//     try {
-//       Map<String, String> headers = {"Content-Type": "application/json"};
-//       final response = await http.get(
-//         Uri.parse('$baseUrl?tid=1&pretty=1&key=$apiKey'),
-//         headers: headers,
-//       );
-//       log('$baseUrl?tid=1&pretty=1&key=$apiKey');
-//       debugPrint(response.toString());
-//       log("message: $response");
-//       if (response.statusCode == 200 || response.statusCode == 201) {
-//         var data = json.decode(response.body);
-//         print(data);
-
-//         return ThreatModel.fromJson(data);
-//       } else {
-//         throw Exception('Failed to load threats: ${response.statusCode}');
-//       }
-//     } catch (e) {
-//       throw Exception('');
-//     }
-//   }
-
-
-
-
 class ThreatService {
   static const String baseUrl = 'https://pulsedive.com/api/info.php';
-  static const String apiKey = 'ed7c4a81552db612cd085eb20a9dbedec25a20f2a10d6a9d626bfe1e6c321c6a';
+  static const String exploreUrl = 'https://pulsedive.com/api/explore.php';
+  static const String apiKey = 'b4b7fde5b582c947c58e7ae89a2f3bd7f848ecf770cb705b0ddd1af6c1fe16ad';
 
-  Future<ThreatModel> fetchThreats() async {
+  // Fetch threat by ID
+  Future<ThreatModel> fetchThreatById(int tid) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl?tid=1&pretty=1&key=$apiKey'),
+        Uri.parse('$baseUrl?tid=$tid&pretty=1&key=$apiKey'),
       );
       
-      log('API Response: ${response.body}');
+      log('API Response for TID $tid: ${response.body}');
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         return ThreatModel.fromJson(data);
       } else {
-        throw Exception('Failed to load threats: ${response.statusCode} - ${response.body}');
+        throw Exception('Failed to load threat: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      log('Error fetching threats: $e');
-      throw Exception('Failed to load threats: $e');
+      log('Error fetching threat by ID $tid: $e');
+      throw Exception('Failed to load threat: $e');
+    }
+  }
+
+  // Fetch threats - default to TID 1
+  Future<ThreatModel> fetchThreats() async {
+    return fetchThreatById(1);
+  }
+
+  // Search threats by query (can be threat ID or name)
+  Future<List<SearchResult>> searchThreats(String query) async {
+    try {
+      // First try to parse as an ID
+      int? threatId = int.tryParse(query);
+      if (threatId != null) {
+        // If it's a valid ID, fetch that specific threat
+        try {
+          final threat = await fetchThreatById(threatId);
+          return [
+            SearchResult(
+              id: threatId,
+              indicator: threat.indicator ?? 'Unknown',
+              type: threat.type ?? 'Unknown',
+              riskLevel: threat.riskLevel ?? 'low',
+            )
+          ];
+        } catch (e) {
+          // If fetching by ID fails, continue with text search
+        }
+      }
+
+      // Search by text query
+      final response = await http.get(
+        Uri.parse('$exploreUrl?q=$query&limit=20&pretty=1&key=$apiKey'),
+      );
+      
+      log('Search API Response for query "$query": ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> results = data['results'] ?? [];
+        
+        return results.map((json) => SearchResult.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to search threats: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      log('Error searching threats: $e');
+      throw Exception('Failed to search threats: $e');
     }
   }
 }
 
+// Model for search results
+class SearchResult {
+  final int id;
+  final String indicator;
+  final String type;
+  final String riskLevel;
 
+  SearchResult({
+    required this.id,
+    required this.indicator,
+    required this.type,
+    required this.riskLevel,
+  });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// threat_api_services.dart
-// class ThreatService {
-//   static const String baseUrl = 'https://pulsedive.com/api';
-//   static const String apiKey = 'ed7c4a81552db612cd085eb20a9dbedec25a20f2a10d6a9d626bfe1e6c321c6a';
-
-//   // Fetch list of basic threat info
-//   Future<List<BasicThreat>> fetchThreatList() async {
-//     try {
-//       final response = await http.get(
-//         Uri.parse('$baseUrl/explore.php?q=threat&limit=10&pretty=1&key=$apiKey'),
-        
-//       );
-//       log('Request URL: $baseUrl'); // Add this line
-//         log('response ${response.body}');
-      
-//       if (response.statusCode == 200) {
-//         final Map<String, dynamic> data = json.decode(response.body);
-//         if (data['results'] != null) {
-//           return (data['results'] as List)
-//               .map((json) => BasicThreat.fromJson(json))
-//               .toList();
-//         }
-//         log('Parsed data: $data'); // Add this line
-//         throw Exception('No results found');
-//       } else {
-//         throw Exception('Failed to load threats: ${response.statusCode}');
-//       }
-//     } catch (e) {
-//       throw Exception('Failed to load threat list: $e');
-//     }
-//   }
-
-  // Fetch detailed threat info
-//   Future<DetailedThreat> fetchThreatDetails(int tid) async {
-//     try {
-//       final response = await http.get(
-//         Uri.parse('$baseUrl/info.php?tid=$tid&pretty=1&key=$apiKey'),
-//       );
-      
-//       if (response.statusCode == 200) {
-//         final Map<String, dynamic> data = json.decode(response.body);
-//         return DetailedThreat.fromJson(data);
-//       } else {
-//         throw Exception('Failed to load threat details: ${response.statusCode}');
-//       }
-//     } catch (e) {
-//       throw Exception('Failed to load threat details: $e');
-//     }
-//   }
-// }
-
-
-
-
-  //   final response = await http.get(
-  //     Uri.parse('$baseUrl?tid=1&pretty=1&key=$apiKey'),
-  //   );
-
-  //   if (response.statusCode == 200) {
-  //     final Map<String, dynamic> data = json.decode(response.body);
-  //     final List<dynamic> results = data['results'] ?? [];
-  //     return results.map((json) => Threat.fromJson(json)).toList();
-  //     // final List<dynamic> data = json.decode(response.body);
-  //     // return data.map((json) => Threat.fromJson(json)).toList();
-  //   } else {
-  //     throw Exception('Failed to load threats: ${response.statusCode}');
-  //   }
-  // }
-// }
+  factory SearchResult.fromJson(Map<String, dynamic> json) {
+    return SearchResult(
+      id: json['tid'] ?? json['id'] ?? 0,
+      indicator: json['indicator'] ?? json['name'] ?? 'Unknown',
+      type: json['type'] ?? 'Unknown',
+      riskLevel: json['risk'] ?? json['riskLevel'] ?? 'low',
+    );
+  }
+}

@@ -1,4 +1,4 @@
-// threadMode.dart
+// threat_model.dart
 class ThreatModel {
   final String? indicator;
   final String? type;
@@ -12,6 +12,7 @@ class ThreatModel {
   final String? threat;
   final String? category;
   final List<String>? othernames;
+  final List<NewsItem>? news;
 
   ThreatModel({
     this.indicator,
@@ -26,6 +27,7 @@ class ThreatModel {
     this.category,
     this.othernames,
     this.wikisummary,
+    this.news,
   });
 
   factory ThreatModel.fromJson(Map<String, dynamic> json) {
@@ -44,6 +46,11 @@ class ThreatModel {
       othernames: json['othernames'] != null
           ? List<String>.from(json['othernames'])
           : [],
+      news: json['news'] != null
+          ? (json['news'] as List)
+              .map((item) => NewsItem.fromJson(item))
+              .toList()
+          : [],
     );
   }
 
@@ -61,7 +68,85 @@ class ThreatModel {
       'category': category,
       'othernames': othernames,
       'wikisummary': wikisummary,
+      'news': news?.map((item) => item.toJson()).toList(),
     };
+  }
+
+  // Helper method to get the latest 4 news items sorted by timestamp
+  List<NewsItem> getLatestNews() {
+    if (news == null || news!.isEmpty) return [];
+    
+    // Sort by timestamp in descending order (newest first)
+    List<NewsItem> sortedNews = List.from(news!);
+    sortedNews.sort((a, b) => b.stamp.compareTo(a.stamp));
+    
+    // Return only the latest 4
+    return sortedNews.take(4).toList();
+  }
+}
+
+// News item model
+class NewsItem {
+  final String title;
+  final String channel;
+  final String icon;
+  final String link;
+  final String stamp;
+  final int primary;
+
+  NewsItem({
+    required this.title,
+    required this.channel,
+    required this.icon,
+    required this.link,
+    required this.stamp,
+    required this.primary,
+  });
+
+  factory NewsItem.fromJson(Map<String, dynamic> json) {
+    return NewsItem(
+      title: json['title'] ?? '',
+      channel: json['channel'] ?? '',
+      icon: json['icon'] ?? '',
+      link: json['link'] ?? '',
+      stamp: json['stamp'] ?? '',
+      primary: json['primary'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'channel': channel,
+      'icon': icon,
+      'link': link,
+      'stamp': stamp,
+      'primary': primary,
+    };
+  }
+}
+
+// Search result model for search functionality
+class SearchResult {
+  final int id;
+  final String indicator;
+  final String type;
+  final String riskLevel;
+
+  SearchResult({
+    required this.id,
+    required this.indicator,
+    required this.type,
+    required this.riskLevel,
+  });
+
+  factory SearchResult.fromJson(Map<String, dynamic> json) {
+    return SearchResult(
+      id: json['id'] ?? 0,
+      indicator: json['indicator'] ?? '',
+      type: json['type'] ?? '',
+      riskLevel: json['risk_level'] ?? 'low',
+    );
   }
 }
 
