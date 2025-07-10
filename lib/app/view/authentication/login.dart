@@ -1,3 +1,4 @@
+import 'package:project/app/constant/widgets/bottom_nav_bar.dart';
 import 'package:project/app/view/main_screens/lesson_screen.dart';
 import 'package:project/app/view/settings_screens/profile.dart';
 import 'package:flutter/material.dart';
@@ -79,7 +80,7 @@ class _LoginState extends State<Login> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => const LessonScreen(),
+            builder: (context) => const BottomNavBar(),
           ), // Navigate to your home screen
         );
       }
@@ -121,88 +122,90 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primary,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        title: Center(
-          child: Text(
-            "Login",
-            style: AppTextStyles.bodyBold18.copyWith(color: AppColors.white),
-          ),
-        ),
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Login to account", style: AppTextStyles.headerMedium20.copyWith(
-                color: AppColors.white,
-              ),),
-              SizedBox(height: 50),
-              CustomTextFormField(
-                textController: emailController,
-                hintText: "Email",
-                enabled: !_isLoading, obscureText: false, validator: (value) {  }, // Disable input when loading
-              ),
-              const SizedBox(height: 30),
-              CustomTextFormField(
-                textController: passwordController,
-                hintText: "Password",
-                isObscure: true, // Typically passwords should be obscured
-                enabled: !_isLoading, obscureText: false, validator: (value) {  }, // Disable input when loading
-              ),
-              const SizedBox(height: 30),
-              _isLoading // <--- NEW: Show CircularProgressIndicator when loading
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.secondary,
-                      ),
-                    )
-                  : CommonButton(
-                      height: 48.h,
-                      width: 327.w,
-                      child: Text(
-                        "Login",
-                        style: AppTextStyles.bodyBold14.copyWith(
-                          color: AppColors.white,
+      // appBar: AppBar(
+      //   backgroundColor: AppColors.primary,
+      //   title: Center(
+      //     child: Text(
+      //       "Login",
+      //       style: AppTextStyles.bodyBold18.copyWith(color: AppColors.white),
+      //     ),
+      //   ),
+      // ),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Login to account", style: AppTextStyles.headerMedium20.copyWith(
+                  color: AppColors.white,
+                ),),
+                SizedBox(height: 50),
+                CustomTextFormField(
+                  textController: emailController,
+                  hintText: "Email",
+                  enabled: !_isLoading, obscureText: false, validator: (value) {  }, // Disable input when loading
+                ),
+                const SizedBox(height: 30),
+                CustomTextFormField(
+                  textController: passwordController,
+                  hintText: "Password",
+                  isObscure: true, // Typically passwords should be obscured
+                  enabled: !_isLoading, obscureText: false, validator: (value) {  }, // Disable input when loading
+                ),
+                const SizedBox(height: 30),
+                _isLoading // <--- NEW: Show CircularProgressIndicator when loading
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.secondary,
                         ),
+                      )
+                    : CommonButton(
+                        height: 48.h,
+                        width: 327.w,
+                        child: Text(
+                          "Login",
+                          style: AppTextStyles.bodyBold14.copyWith(
+                            color: AppColors.white,
+                          ),
+                        ),
+                        onTap:
+                            _signInWithEmailAndPassword, // <--- NEW: Call the email/password login function
                       ),
-                      onTap:
-                          _signInWithEmailAndPassword, // <--- NEW: Call the email/password login function
-                    ),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Don't have an account?",
-                    style: AppTextStyles.bodyMedium16.copyWith(
-                      color: AppColors.tertiary,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: _isLoading
-                        ? null
-                        : () {
-                            // <--- NEW: Disable when loading
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SignUp(),
-                              ),
-                            );
-                          },
-                    child: Text(
-                      "Sign Up",
-                      style: AppTextStyles.bodyLight14.copyWith(
+                const SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Don't have an account?",
+                      style: AppTextStyles.bodyMedium16.copyWith(
                         color: AppColors.tertiary,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    TextButton(
+                      onPressed: _isLoading
+                          ? null
+                          : () {
+                              // <--- NEW: Disable when loading
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SignUp(),
+                                ),
+                              );
+                            },
+                      child: Text(
+                        "Sign Up",
+                        style: AppTextStyles.bodyLight14.copyWith(
+                          color: AppColors.tertiary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
