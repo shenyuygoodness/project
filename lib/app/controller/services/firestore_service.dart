@@ -1,33 +1,91 @@
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:project/app/model/lesson_model.dart';
 
 class FirebaseService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static final FirebaseAuth _auth = FirebaseAuth.instance;
   static const String lessonsCollection = 'lessons';
 
-  // Save a lesson to Firestore
+  // Get current user ID
+  String? get currentUserId => _auth.currentUser?.uid;
+
+  // Helper method to get user's lessons collection reference
+  CollectionReference get _userLessonsCollection {
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+    return _firestore
+        .collection('users')
+        .doc(currentUserId)
+        .collection(lessonsCollection);
+  }
+
+  // Save a lesson to Firestore for current user
   Future<String> saveLesson(LessonModel lesson) async {
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
     try {
-      final docRef = await _firestore.collection(lessonsCollection).add(lesson.toFirestore());
-      log('Lesson saved successfully with ID: ${docRef.id}');
-      return docRef.id;
+      // Check if lesson already exists for this threat
+      final existingLesson = await getLessonByThreatId(lesson.threatId);
+      
+      if (existingLesson != null) {
+        // Update existing lesson
+        // Pass the LessonModel object directly to updateLesson
+        await updateLesson(lesson.copyWith(id: existingLesson.id, updatedAt: DateTime.now()));
+        log('Lesson updated successfully for threat: ${lesson.threatId}');
+        return existingLesson.id!;
+      } else {
+        // Create new lesson
+        final docRef = await _userLessonsCollection.add(lesson.toFirestore());
+        log('Lesson saved successfully with ID: ${docRef.id}');
+        return docRef.id;
+      }
     } catch (e) {
       log('Error saving lesson: $e');
       throw Exception('Failed to save lesson: $e');
     }
   }
 
-  // Get all lessons from Firestore
-  Future<List<LessonModel>> getAllLessons() async {
+  // Get lesson by threat ID for current user
+  Future<LessonModel?> getLessonByThreatId(String threatId) async {
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
     try {
-      final querySnapshot = await _firestore
-          .collection(lessonsCollection)
+      final querySnapshot = await _userLessonsCollection
+          .where('threatId', isEqualTo: threatId)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        final doc = querySnapshot.docs.first;
+        return LessonModel.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
+      }
+      return null;
+    } catch (e) {
+      log('Error fetching lesson by threat ID: $e');
+      throw Exception('Failed to fetch lesson by threat ID: $e');
+    }
+  }
+
+  // Get all lessons from Firestore for current user
+  Future<List<LessonModel>> getAllLessons() async {
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    try {
+      final querySnapshot = await _userLessonsCollection
           .orderBy('createdAt', descending: true)
           .get();
 
       return querySnapshot.docs.map((doc) {
-        return LessonModel.fromFirestore(doc.id, doc.data());
+        return LessonModel.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
       }).toList();
     } catch (e) {
       log('Error fetching lessons: $e');
@@ -35,13 +93,17 @@ class FirebaseService {
     }
   }
 
-  // Get a specific lesson by ID
+  // Get a specific lesson by ID for current user
   Future<LessonModel?> getLessonById(String id) async {
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
     try {
-      final doc = await _firestore.collection(lessonsCollection).doc(id).get();
+      final doc = await _userLessonsCollection.doc(id).get();
       
       if (doc.exists) {
-        return LessonModel.fromFirestore(doc.id, doc.data()!);
+        return LessonModel.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
       }
       return null;
     } catch (e) {
@@ -50,10 +112,14 @@ class FirebaseService {
     }
   }
 
-  // Update a lesson
+  // Update a lesson for current user
   Future<void> updateLesson(LessonModel lesson) async {
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
     try {
-      await _firestore.collection(lessonsCollection).doc(lesson.id).update(
+      await _userLessonsCollection.doc(lesson.id).update(
         lesson.copyWith(updatedAt: DateTime.now()).toFirestore(),
       );
       log('Lesson updated successfully');
@@ -63,10 +129,14 @@ class FirebaseService {
     }
   }
 
-  // Delete a lesson
+  // Delete a lesson for current user
   Future<void> deleteLesson(String id) async {
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
     try {
-      await _firestore.collection(lessonsCollection).doc(id).delete();
+      await _userLessonsCollection.doc(id).delete();
       log('Lesson deleted successfully');
     } catch (e) {
       log('Error deleting lesson: $e');
@@ -74,18 +144,21 @@ class FirebaseService {
     }
   }
 
-  // Search lessons by title or content
+  // Search lessons by title or content for current user
   Future<List<LessonModel>> searchLessons(String query) async {
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
     try {
-      final querySnapshot = await _firestore
-          .collection(lessonsCollection)
+      final querySnapshot = await _userLessonsCollection
           .where('title', isGreaterThanOrEqualTo: query)
           .where('title', isLessThan: query + '\uf8ff')
           .orderBy('title')
           .get();
 
       return querySnapshot.docs.map((doc) {
-        return LessonModel.fromFirestore(doc.id, doc.data());
+        return LessonModel.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
       }).toList();
     } catch (e) {
       log('Error searching lessons: $e');
@@ -93,17 +166,20 @@ class FirebaseService {
     }
   }
 
-  // Get lessons by threat type
+  // Get lessons by threat type for current user
   Future<List<LessonModel>> getLessonsByThreatType(String threatType) async {
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
     try {
-      final querySnapshot = await _firestore
-          .collection(lessonsCollection)
+      final querySnapshot = await _userLessonsCollection
           .where('threatType', isEqualTo: threatType)
           .orderBy('createdAt', descending: true)
           .get();
 
       return querySnapshot.docs.map((doc) {
-        return LessonModel.fromFirestore(doc.id, doc.data());
+        return LessonModel.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
       }).toList();
     } catch (e) {
       log('Error fetching lessons by threat type: $e');
@@ -111,17 +187,20 @@ class FirebaseService {
     }
   }
 
-  // Get lessons by risk level
+  // Get lessons by risk level for current user
   Future<List<LessonModel>> getLessonsByRiskLevel(String riskLevel) async {
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
     try {
-      final querySnapshot = await _firestore
-          .collection(lessonsCollection)
+      final querySnapshot = await _userLessonsCollection
           .where('riskLevel', isEqualTo: riskLevel)
           .orderBy('createdAt', descending: true)
           .get();
 
       return querySnapshot.docs.map((doc) {
-        return LessonModel.fromFirestore(doc.id, doc.data());
+        return LessonModel.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
       }).toList();
     } catch (e) {
       log('Error fetching lessons by risk level: $e');
@@ -129,17 +208,20 @@ class FirebaseService {
     }
   }
 
-  // Get lessons by difficulty
+  // Get lessons by difficulty for current user
   Future<List<LessonModel>> getLessonsByDifficulty(String difficulty) async {
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
     try {
-      final querySnapshot = await _firestore
-          .collection(lessonsCollection)
+      final querySnapshot = await _userLessonsCollection
           .where('difficulty', isEqualTo: difficulty)
           .orderBy('createdAt', descending: true)
           .get();
 
       return querySnapshot.docs.map((doc) {
-        return LessonModel.fromFirestore(doc.id, doc.data());
+        return LessonModel.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
       }).toList();
     } catch (e) {
       log('Error fetching lessons by difficulty: $e');
@@ -147,25 +229,32 @@ class FirebaseService {
     }
   }
 
-  // Get lessons stream for real-time updates
+  // Get lessons stream for real-time updates for current user
   Stream<List<LessonModel>> getLessonsStream() {
-    return _firestore
-        .collection(lessonsCollection)
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    return _userLessonsCollection
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((querySnapshot) {
       return querySnapshot.docs.map((doc) {
-        return LessonModel.fromFirestore(doc.id, doc.data());
+        return LessonModel.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
       }).toList();
     });
   }
 
-  // Get statistics
+  // Get statistics for current user
   Future<Map<String, dynamic>> getLessonStatistics() async {
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
     try {
-      final querySnapshot = await _firestore.collection(lessonsCollection).get();
+      final querySnapshot = await _userLessonsCollection.get();
       final lessons = querySnapshot.docs.map((doc) {
-        return LessonModel.fromFirestore(doc.id, doc.data());
+        return LessonModel.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
       }).toList();
 
       final stats = <String, dynamic>{
@@ -195,4 +284,10 @@ class FirebaseService {
       throw Exception('Failed to fetch lesson statistics: $e');
     }
   }
+
+  // Check if user is authenticated
+  bool get isAuthenticated => currentUserId != null;
+
+  // Listen to auth state changes
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
 }

@@ -1,157 +1,138 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:project/app/model/threat_model.dart';
 
 class LessonModel {
-  final String id;
+  final String? id;
   final String title;
-  final String content;
   final String summary;
+  final String content;
   final String threatType;
   final String riskLevel;
-  final String sourceIndicator;
-  final int sourceThreatId;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final String difficulty;
   final List<String> keyPoints;
   final List<String> preventionSteps;
   final List<String> detectionMethods;
-  final String difficulty; // beginner, intermediate, advanced
   final List<String> tags;
+  final String threatId; // Added threatId field
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   LessonModel({
-    required this.id,
+    this.id,
     required this.title,
-    required this.content,
     required this.summary,
+    required this.content,
     required this.threatType,
     required this.riskLevel,
-    required this.sourceIndicator,
-    required this.sourceThreatId,
-    required this.createdAt,
-    required this.updatedAt,
+    required this.difficulty,
     required this.keyPoints,
     required this.preventionSteps,
     required this.detectionMethods,
-    required this.difficulty,
-    required this.tags, required List<NewsItem> news,
+    required this.tags,
+    required this.threatId, // Added threatId parameter
+    required this.createdAt,
+    required this.updatedAt,
+    //  required List<NewsItem> news,
   });
 
-  factory LessonModel.fromJson(Map<String, dynamic> json) {
+  // Factory constructor from Firestore
+  factory LessonModel.fromFirestore(String id, Map<String, dynamic> data) {
     return LessonModel(
-      id: json['id'] ?? '',
-      title: json['title'] ?? '',
-      content: json['content'] ?? '',
-      summary: json['summary'] ?? '',
-      threatType: json['threatType'] ?? '',
-      riskLevel: json['riskLevel'] ?? '',
-      sourceIndicator: json['sourceIndicator'] ?? '',
-      sourceThreatId: json['sourceThreatId'] ?? 0,
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt']) 
-          : DateTime.now(),
-      updatedAt: json['updatedAt'] != null 
-          ? DateTime.parse(json['updatedAt']) 
-          : DateTime.now(),
-      keyPoints: List<String>.from(json['keyPoints'] ?? []),
-      preventionSteps: List<String>.from(json['preventionSteps'] ?? []),
-      detectionMethods: List<String>.from(json['detectionMethods'] ?? []),
-      difficulty: json['difficulty'] ?? 'beginner',
-      tags: List<String>.from(json['tags'] ?? []), news: [],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'content': content,
-      'summary': summary,
-      'threatType': threatType,
-      'riskLevel': riskLevel,
-      'sourceIndicator': sourceIndicator,
-      'sourceThreatId': sourceThreatId,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
-      'keyPoints': keyPoints,
-      'preventionSteps': preventionSteps,
-      'detectionMethods': detectionMethods,
-      'difficulty': difficulty,
-      'tags': tags,
-    };
-  }
-
-  Map<String, dynamic> toFirestore() {
-    return {
-      'title': title,
-      'content': content,
-      'summary': summary,
-      'threatType': threatType,
-      'riskLevel': riskLevel,
-      'sourceIndicator': sourceIndicator,
-      'sourceThreatId': sourceThreatId,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
-      'keyPoints': keyPoints,
-      'preventionSteps': preventionSteps,
-      'detectionMethods': detectionMethods,
-      'difficulty': difficulty,
-      'tags': tags,
-    };
-  }
-
-  factory LessonModel.fromFirestore(String documentId, Map<String, dynamic> data) {
-    return LessonModel(
-      id: documentId,
+      id: id,
       title: data['title'] ?? '',
-      content: data['content'] ?? '',
       summary: data['summary'] ?? '',
+      content: data['content'] ?? '',
       threatType: data['threatType'] ?? '',
       riskLevel: data['riskLevel'] ?? '',
-      sourceIndicator: data['sourceIndicator'] ?? '',
-      sourceThreatId: data['sourceThreatId'] ?? 0,
-      createdAt: (data['createdAt'] as dynamic)?.toDate() ?? DateTime.now(),
-      updatedAt: (data['updatedAt'] as dynamic)?.toDate() ?? DateTime.now(),
+      difficulty: data['difficulty'] ?? '',
       keyPoints: List<String>.from(data['keyPoints'] ?? []),
       preventionSteps: List<String>.from(data['preventionSteps'] ?? []),
       detectionMethods: List<String>.from(data['detectionMethods'] ?? []),
-      difficulty: data['difficulty'] ?? 'beginner',
-      tags: List<String>.from(data['tags'] ?? []), news: [],
+      tags: List<String>.from(data['tags'] ?? []),
+      threatId: data['threatId'] ?? '', // Added threatId from Firestore
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(), 
     );
   }
 
-  // Create a copy with updated fields
+  // Convert to Firestore format
+  Map<String, dynamic> toFirestore() {
+    return {
+      'title': title,
+      'summary': summary,
+      'content': content,
+      'threatType': threatType,
+      'riskLevel': riskLevel,
+      'difficulty': difficulty,
+      'keyPoints': keyPoints,
+      'preventionSteps': preventionSteps,
+      'detectionMethods': detectionMethods,
+      'tags': tags,
+      'threatId': threatId, // Added threatId to Firestore
+      'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': Timestamp.fromDate(updatedAt),
+    };
+  }
+
+  // CopyWith method for updating fields
   LessonModel copyWith({
     String? id,
     String? title,
-    String? content,
     String? summary,
+    String? content,
     String? threatType,
     String? riskLevel,
-    String? sourceIndicator,
-    int? sourceThreatId,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    String? difficulty,
     List<String>? keyPoints,
     List<String>? preventionSteps,
     List<String>? detectionMethods,
-    String? difficulty,
     List<String>? tags,
+    String? threatId,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return LessonModel(
       id: id ?? this.id,
       title: title ?? this.title,
-      content: content ?? this.content,
       summary: summary ?? this.summary,
+      content: content ?? this.content,
       threatType: threatType ?? this.threatType,
       riskLevel: riskLevel ?? this.riskLevel,
-      sourceIndicator: sourceIndicator ?? this.sourceIndicator,
-      sourceThreatId: sourceThreatId ?? this.sourceThreatId,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      difficulty: difficulty ?? this.difficulty,
       keyPoints: keyPoints ?? this.keyPoints,
       preventionSteps: preventionSteps ?? this.preventionSteps,
       detectionMethods: detectionMethods ?? this.detectionMethods,
-      difficulty: difficulty ?? this.difficulty,
-      tags: tags ?? this.tags, news: [],
+      tags: tags ?? this.tags,
+      threatId: threatId ?? this.threatId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
+  }
+
+  @override
+  String toString() {
+    return 'LessonModel(id: $id, title: $title, threatId: $threatId, threatType: $threatType, riskLevel: $riskLevel, difficulty: $difficulty)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is LessonModel &&
+        other.id == id &&
+        other.title == title &&
+        other.threatId == threatId &&
+        other.threatType == threatType &&
+        other.riskLevel == riskLevel &&
+        other.difficulty == difficulty;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        title.hashCode ^
+        threatId.hashCode ^
+        threatType.hashCode ^
+        riskLevel.hashCode ^
+        difficulty.hashCode;
   }
 }

@@ -216,7 +216,7 @@ class _LessonDetailScreenState extends State<LessonDetailScreen>
 
   Future<void> _deleteLesson() async {
     try {
-      await _firebaseService.deleteLesson(widget.lesson.id);
+      await _firebaseService.deleteLesson(widget.lesson.id!);
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -728,8 +728,8 @@ class _LessonDetailScreenState extends State<LessonDetailScreen>
             const SizedBox(height: 12.0),
             const Divider(color: Colors.white24, thickness: 1),
             const SizedBox(height: 12.0),
-            _buildMetadataRow('Source Indicator', widget.lesson.sourceIndicator),
-            _buildMetadataRow('Source Threat ID', widget.lesson.sourceThreatId.toString()),
+            // _buildMetadataRow('Source Indicator', widget.lesson.sourceIndicator),
+            _buildMetadataRow('Source Threat ID', widget.lesson.threatId.toString()),
             _buildMetadataRow('Created', _formatDate(widget.lesson.createdAt)),
             _buildMetadataRow('Last Updated', _formatDate(widget.lesson.updatedAt)),
             if (widget.lesson.tags.isNotEmpty) ...[

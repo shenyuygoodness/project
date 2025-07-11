@@ -1034,12 +1034,12 @@ class _ThreatScreenState extends State<ThreatScreen> with TickerProviderStateMix
         backgroundColor: const Color(0xFF1A252F),
         elevation: 0,
         actions: [
-          // NEW: View Lessons button
-          IconButton(
-            icon: const Icon(Icons.school, color: Colors.white),
-            onPressed: navigateToLessons,
-            tooltip: 'View Lessons',
-          ),
+          
+          // IconButton(
+          //   icon: const Icon(Icons.school, color: Colors.white),
+          //   onPressed: navigateToLessons,
+          //   tooltip: 'View Lessons',
+          // ),
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: refreshData,

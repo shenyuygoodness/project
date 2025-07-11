@@ -20,7 +20,7 @@ class _LessonsListScreenState extends State<LessonsListScreen> {
   List<LessonModel> filteredLessons = [];
   bool isLoading = true;
   String selectedDifficulty = 'all';
-  String selectedRiskLevel = 'all';
+  // String selectedRiskLevel = 'all';
   String selectedThreatType = 'all';
 
   @override
@@ -72,13 +72,13 @@ class _LessonsListScreenState extends State<LessonsListScreen> {
         final matchesDifficulty = selectedDifficulty == 'all' || 
             lesson.difficulty == selectedDifficulty;
 
-        final matchesRiskLevel = selectedRiskLevel == 'all' || 
-            lesson.riskLevel == selectedRiskLevel;
+        // final matchesRiskLevel = selectedRiskLevel == 'all' || 
+        //     lesson.riskLevel == selectedRiskLevel;
 
         final matchesThreatType = selectedThreatType == 'all' || 
             lesson.threatType == selectedThreatType;
 
-        return matchesSearch && matchesDifficulty && matchesRiskLevel && matchesThreatType;
+        return matchesSearch && matchesDifficulty && matchesThreatType;
       }).toList();
     });
   }
@@ -94,7 +94,7 @@ class _LessonsListScreenState extends State<LessonsListScreen> {
 
   Future<void> _deleteLesson(LessonModel lesson) async {
     try {
-      await _firebaseService.deleteLesson(lesson.id);
+      await _firebaseService.deleteLesson(lesson.id!);
       await _loadLessons();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -219,15 +219,15 @@ class _LessonsListScreenState extends State<LessonsListScreen> {
                     });
                     _filterLessons();
                   }),
-                  const SizedBox(width: 8.0),
-                  _buildFilterChip('Risk Level', selectedRiskLevel, [
-                    'all', 'low', 'medium', 'high'
-                  ], (value) {
-                    setState(() {
-                      selectedRiskLevel = value;
-                    });
-                    _filterLessons();
-                  }),
+                  // const SizedBox(width: 8.0),
+                  // _buildFilterChip('Risk Level', selectedRiskLevel, [
+                  //   'all', 'low', 'medium', 'high'
+                  // ], (value) {
+                  //   setState(() {
+                  //     selectedRiskLevel = value;
+                  //   });
+                  //   _filterLessons();
+                  // }),
                   const SizedBox(width: 8.0),
                   _buildFilterChip('Threat Type', selectedThreatType, [
                     'all', 'malware', 'phishing', 'domain', 'ip', 'url'
