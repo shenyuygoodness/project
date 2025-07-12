@@ -1,5 +1,6 @@
 // threat_model.dart
 class ThreatModel {
+  final String id; // Changed from int tid to String id
   final String? indicator;
   final String? type;
   final String? risk;
@@ -14,7 +15,8 @@ class ThreatModel {
   final List<String>? othernames;
   final List<NewsItem>? news;
 
-  ThreatModel({
+  ThreatModel({ // Removed positional argument, added named 'id'
+    required this.id,
     this.indicator,
     this.type,
     this.risk,
@@ -31,7 +33,8 @@ class ThreatModel {
   });
 
   factory ThreatModel.fromJson(Map<String, dynamic> json) {
-    return ThreatModel(
+    return ThreatModel( // Added 'id' field
+      id: json['id'] ?? '', // Assuming 'id' field exists in JSON or default to empty string
       indicator: json['indicator'],
       type: json['type'],
       risk: json['risk'],
@@ -48,13 +51,14 @@ class ThreatModel {
           : [],
       news: json['news'] != null
           ? (json['news'] as List)
-              .map((item) => NewsItem.fromJson(item))
-              .toList()
+                .map((item) => NewsItem.fromJson(item))
+                .toList()
           : [],
     );
   }
 
   Map<String, dynamic> toJson() {
+    // Added 'id' to toJson
     return {
       'indicator': indicator,
       'type': type,
@@ -75,11 +79,11 @@ class ThreatModel {
   // Helper method to get the latest 4 news items sorted by timestamp
   List<NewsItem> getLatestNews() {
     if (news == null || news!.isEmpty) return [];
-    
+
     // Sort by timestamp in descending order (newest first)
     List<NewsItem> sortedNews = List.from(news!);
     sortedNews.sort((a, b) => b.stamp.compareTo(a.stamp));
-    
+
     // Return only the latest 4
     return sortedNews.take(4).toList();
   }

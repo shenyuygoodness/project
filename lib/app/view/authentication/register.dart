@@ -10,7 +10,6 @@ import 'package:project/app/constant/widgets/custom_text_field.dart';
 import 'package:project/app/view/authentication/login.dart'; // Navigate back to login after email sign up
 import 'package:project/app/view/settings_screens/profile.dart'; // Navigate to profile after social sign in
 
-
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
 
@@ -61,12 +60,20 @@ class _SignUpState extends State<SignUp> {
 
   // <--- UPDATED: Function for Email/Password Sign-Up with Firestore save
   Future<void> _signUpWithEmailAndPassword() async {
-    if (emailController.text.trim().isEmpty || passwordController.text.trim().isEmpty || nameController.text.trim().isEmpty) {
-      _showSnackBar('Please fill in all required fields (Name, Email, Password).', isError: true);
+    if (emailController.text.trim().isEmpty ||
+        passwordController.text.trim().isEmpty ||
+        nameController.text.trim().isEmpty) {
+      _showSnackBar(
+        'Please fill in all required fields (Name, Email, Password).',
+        isError: true,
+      );
       return;
     }
     if (passwordController.text.length < 6) {
-      _showSnackBar('Password must be at least 6 characters long.', isError: true);
+      _showSnackBar(
+        'Password must be at least 6 characters long.',
+        isError: true,
+      );
       return;
     }
 
@@ -75,46 +82,57 @@ class _SignUpState extends State<SignUp> {
     });
 
     try {
-      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: emailController.text.trim(),
+            password: passwordController.text.trim(),
+          );
 
       // Optionally, update the user's display name immediately after creation in Auth
       await userCredential.user?.updateDisplayName(nameController.text.trim());
 
       // <--- NEW: Save additional user data to Firestore
       if (userCredential.user != null) {
-        await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
-          'name': nameController.text.trim(), // Storing name here for consistency and easy access
-          'email': emailController.text.trim(),
-          'status': statusController.text.trim(),
-          'company': companyController.text.trim(),
-          'createdAt': FieldValue.serverTimestamp(), // Useful for analytics/sorting
-        });
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .set({
+              'name': nameController.text
+                  .trim(), // Storing name here for consistency and easy access
+              'email': emailController.text.trim(),
+              'status': statusController.text.trim(),
+              'company': companyController.text.trim(),
+              'createdAt':
+                  FieldValue.serverTimestamp(), // Useful for analytics/sorting
+            });
       }
 
       if (mounted) {
         _showSnackBar('Account created successfully!', isError: false);
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const Login()), // Navigate to Login Screen
+          MaterialPageRoute(
+            builder: (context) => const Login(),
+          ), // Navigate to Login Screen
         );
       }
     } on FirebaseAuthException catch (e) {
       String errorMessage;
       switch (e.code) {
         case 'weak-password':
-          errorMessage = 'The password provided is too weak. Please choose a stronger one.';
+          errorMessage =
+              'The password provided is too weak. Please choose a stronger one.';
           break;
         case 'email-already-in-use':
-          errorMessage = 'An account already exists for that email. Please try logging in.';
+          errorMessage =
+              'An account already exists for that email. Please try logging in.';
           break;
         case 'invalid-email':
           errorMessage = 'The email address is not valid.';
           break;
         default:
-          errorMessage = 'Sign Up failed: ${e.message ?? 'An unknown error occurred'}';
+          errorMessage =
+              'Sign Up failed: ${e.message ?? 'An unknown error occurred'}';
       }
       _showSnackBar(errorMessage, isError: true);
     } catch (e) {
@@ -130,90 +148,118 @@ class _SignUpState extends State<SignUp> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primary,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        title: Center(
-            child: Text("Sign Up",
-                style: AppTextStyles.bodyBold18
-                    .copyWith(color: AppColors.white,))),
-      ),
-      body: ListView(
-        padding: EdgeInsets.only(left: 15, right: 15),
-        children: [
-          const SizedBox(height: 20),
-          CustomTextFormField(
+      // appBar: AppBar(
+      //   backgroundColor: AppColors.primary,
+      //   title: Center(
+      //       child: Text("Sign Up",
+      //           style: AppTextStyles.bodyBold18
+      //               .copyWith(color: AppColors.white,))),
+      // ),
+      body: SafeArea(
+        child: ListView(
+          padding: EdgeInsets.only(left: 15, right: 15),
+          children: [
+            SizedBox(height: 20),
+            Center(child: Text("Create an Account", style: AppTextStyles.headerMedium20.copyWith(color: AppColors.white))),
+            SizedBox(height: 20),
+            CustomTextFormField(
               label: "Name",
               textController: nameController,
               hintText: "Enter your full name",
-              enabled: !_isLoading, obscureText: false, validator: (value) {  },
-          ),
-          const SizedBox(height: 20),
-          CustomTextFormField(
+              enabled: !_isLoading,
+              obscureText: false,
+              validator: (value) {},
+            ),
+            const SizedBox(height: 20),
+            CustomTextFormField(
               label: "Email",
               textController: emailController,
               hintText: "Enter your email",
-              enabled: !_isLoading, obscureText: false, validator: (value) {  },
-          ),
-          const SizedBox(height: 20),
-          CustomTextFormField(
+              enabled: !_isLoading,
+              obscureText: false,
+              validator: (value) {},
+            ),
+            const SizedBox(height: 20),
+            CustomTextFormField(
               label: "Password",
               textController: passwordController,
               hintText: "Enter your password",
               isObscure: true,
-              enabled: !_isLoading, obscureText: false, validator: (value) {  },
-          ),
-          const SizedBox(height: 20),
-          CustomTextFormField(
+              enabled: !_isLoading,
+              obscureText: false,
+              validator: (value) {},
+            ),
+            const SizedBox(height: 20),
+            CustomTextFormField(
               label: "Status",
               textController: statusController,
               hintText: "e.g., Student, Professional",
-              enabled: !_isLoading, obscureText: false, validator: (value) {  },
-          ),
-          const SizedBox(height: 20),
-          CustomTextFormField(
+              enabled: !_isLoading,
+              obscureText: false,
+              validator: (value) {},
+            ),
+            const SizedBox(height: 20),
+            CustomTextFormField(
               label: "Company/School",
               textController: companyController,
               hintText: "Enter your company or school name",
-              enabled: !_isLoading, obscureText: false, validator: (value) {  },
-          ),
-          const SizedBox(height: 30),
-          _isLoading
-              ? Center(child: CircularProgressIndicator(color: AppColors.secondary))
-              : CommonButton(
-                  width: 358,
-                  height: 48,
-                  child: Text(
-                    "Sign Up",
-                    style: AppTextStyles.bodyBold14.copyWith(
-                      color: AppColors.white,
+              enabled: !_isLoading,
+              obscureText: false,
+              validator: (value) {},
+            ),
+            const SizedBox(height: 30),
+            _isLoading
+                ? Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.secondary,
+                    ),
+                  )
+                : CommonButton(
+                    width: 358,
+                    height: 48,
+                    child: Text(
+                      "Sign Up",
+                      style: AppTextStyles.bodyBold14.copyWith(
+                        color: AppColors.white,
+                      ),
+                    ),
+                    onTap: _signUpWithEmailAndPassword,
+                  ),
+            const SizedBox(height: 30),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Already have an account?",
+                    style: AppTextStyles.bodyMedium16.copyWith(
+                      color: AppColors.tertiary,
                     ),
                   ),
-                  onTap: _signUpWithEmailAndPassword,
-                ),
-          const SizedBox(height: 30),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Already have an account?", style: AppTextStyles.bodyMedium16.copyWith(color: AppColors.tertiary),),
-                TextButton(
-                  onPressed: _isLoading ? null : () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const Login()),
-                    );
-                  },
-                  child: Text(
-                    "Login",
-                    style: AppTextStyles.bodyLight14
-                        .copyWith(color: AppColors.tertiary),
+                  TextButton(
+                    onPressed: _isLoading
+                        ? null
+                        : () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const Login(),
+                              ),
+                            );
+                          },
+                    child: Text(
+                      "Login",
+                      style: AppTextStyles.bodyLight16.copyWith(
+                        color: AppColors.tertiary,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          )
-        ],
+          ],
+        ),
       ),
     );
   }
