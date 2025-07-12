@@ -3,6 +3,7 @@ import 'package:project/app/constant/theme/app_colors.dart';
 import 'package:project/app/controller/services/firestore_service.dart';
 import 'package:project/app/model/lesson_model.dart';
 import 'package:project/app/view/details_screens/lesson_details_screens.dart';
+import 'package:project/app/view/main_screens/threats_screen.dart';
 // import 'lesson_detail_screen.dart';
 
 class LessonsListScreen extends StatefulWidget {
@@ -15,7 +16,7 @@ class LessonsListScreen extends StatefulWidget {
 class _LessonsListScreenState extends State<LessonsListScreen> {
   final FirebaseService _firebaseService = FirebaseService();
   final TextEditingController _searchController = TextEditingController();
-  
+
   List<LessonModel> allLessons = [];
   List<LessonModel> filteredLessons = [];
   bool isLoading = true;
@@ -65,17 +66,24 @@ class _LessonsListScreenState extends State<LessonsListScreen> {
   void _filterLessons() {
     setState(() {
       filteredLessons = allLessons.where((lesson) {
-        final matchesSearch = _searchController.text.isEmpty ||
-            lesson.title.toLowerCase().contains(_searchController.text.toLowerCase()) ||
-            lesson.content.toLowerCase().contains(_searchController.text.toLowerCase());
+        final matchesSearch =
+            _searchController.text.isEmpty ||
+            lesson.title.toLowerCase().contains(
+              _searchController.text.toLowerCase(),
+            ) ||
+            lesson.content.toLowerCase().contains(
+              _searchController.text.toLowerCase(),
+            );
 
-        final matchesDifficulty = selectedDifficulty == 'all' || 
+        final matchesDifficulty =
+            selectedDifficulty == 'all' ||
             lesson.difficulty == selectedDifficulty;
 
-        // final matchesRiskLevel = selectedRiskLevel == 'all' || 
+        // final matchesRiskLevel = selectedRiskLevel == 'all' ||
         //     lesson.riskLevel == selectedRiskLevel;
 
-        final matchesThreatType = selectedThreatType == 'all' || 
+        final matchesThreatType =
+            selectedThreatType == 'all' ||
             lesson.threatType == selectedThreatType;
 
         return matchesSearch && matchesDifficulty && matchesThreatType;
@@ -132,7 +140,10 @@ class _LessonsListScreenState extends State<LessonsListScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white60)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white60),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -211,14 +222,17 @@ class _LessonsListScreenState extends State<LessonsListScreen> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildFilterChip('Difficulty', selectedDifficulty, [
-                    'all', 'beginner', 'intermediate', 'advanced'
-                  ], (value) {
-                    setState(() {
-                      selectedDifficulty = value;
-                    });
-                    _filterLessons();
-                  }),
+                  _buildFilterChip(
+                    'Difficulty',
+                    selectedDifficulty,
+                    ['all', 'beginner', 'intermediate', 'advanced'],
+                    (value) {
+                      setState(() {
+                        selectedDifficulty = value;
+                      });
+                      _filterLessons();
+                    },
+                  ),
                   // const SizedBox(width: 8.0),
                   // _buildFilterChip('Risk Level', selectedRiskLevel, [
                   //   'all', 'low', 'medium', 'high'
@@ -229,14 +243,17 @@ class _LessonsListScreenState extends State<LessonsListScreen> {
                   //   _filterLessons();
                   // }),
                   const SizedBox(width: 8.0),
-                  _buildFilterChip('Threat Type', selectedThreatType, [
-                    'all', 'malware', 'phishing', 'domain', 'ip', 'url'
-                  ], (value) {
-                    setState(() {
-                      selectedThreatType = value;
-                    });
-                    _filterLessons();
-                  }),
+                  _buildFilterChip(
+                    'Threat Type',
+                    selectedThreatType,
+                    ['all', 'malware', 'phishing', 'domain', 'ip', 'url'],
+                    (value) {
+                      setState(() {
+                        selectedThreatType = value;
+                      });
+                      _filterLessons();
+                    },
+                  ),
                 ],
               ),
             ),
@@ -251,71 +268,78 @@ class _LessonsListScreenState extends State<LessonsListScreen> {
                     child: CircularProgressIndicator(color: Colors.white),
                   )
                 : filteredLessons.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.school_outlined,
-                              color: Colors.white60,
-                              size: 64,
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'No lessons found',
-                              style: TextStyle(
-                                color: Colors.white60,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Generate lessons from threat intelligence data',
-                              style: TextStyle(
-                                // color: AppColors.white,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              icon: const Icon(Icons.add, color: Colors.white),
-                              label: const Text(
-                                'Generate Lessons',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24.0,
-                                  vertical: 12.0,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                              ),
-                            ),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.school_outlined,
+                          color: Colors.white60,
+                          size: 64,
                         ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        itemCount: filteredLessons.length,
-                        itemBuilder: (context, index) {
-                          final lesson = filteredLessons[index];
-                          return _buildLessonCard(lesson);
-                        },
-                      ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'No lessons found',
+                          style: TextStyle(
+                            color: Colors.white60,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Generate lessons from threat intelligence data',
+                          style: TextStyle(
+                            // color: AppColors.white,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context, MaterialPageRoute(builder: (context) => const ThreatScreen()),
+                            );
+                          },
+                          icon: const Icon(Icons.add, color: Colors.white),
+                          label: const Text(
+                            'Generate Lessons',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24.0,
+                              vertical: 12.0,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    itemCount: filteredLessons.length,
+                    itemBuilder: (context, index) {
+                      final lesson = filteredLessons[index];
+                      return _buildLessonCard(lesson);
+                    },
+                  ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFilterChip(String label, String selectedValue, List<String> options, Function(String) onChanged) {
+  Widget _buildFilterChip(
+    String label,
+    String selectedValue,
+    List<String> options,
+    Function(String) onChanged,
+  ) {
     return PopupMenuButton<String>(
       onSelected: onChanged,
       itemBuilder: (context) {
@@ -368,9 +392,7 @@ class _LessonsListScreenState extends State<LessonsListScreen> {
       color: const Color(0xFF2D3E50),
       margin: const EdgeInsets.only(bottom: 16.0),
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: InkWell(
         onTap: () => _navigateToLessonDetail(lesson),
         borderRadius: BorderRadius.circular(12.0),
@@ -410,10 +432,7 @@ class _LessonsListScreenState extends State<LessonsListScreen> {
                         ),
                       ),
                     ],
-                    child: const Icon(
-                      Icons.more_vert,
-                      color: Colors.white60,
-                    ),
+                    child: const Icon(Icons.more_vert, color: Colors.white60),
                   ),
                 ],
               ),
@@ -438,7 +457,10 @@ class _LessonsListScreenState extends State<LessonsListScreen> {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 4.0,
+                    ),
                     decoration: BoxDecoration(
                       color: _getDifficultyColor(lesson.difficulty),
                       borderRadius: BorderRadius.circular(12.0),
@@ -454,7 +476,10 @@ class _LessonsListScreenState extends State<LessonsListScreen> {
                   ),
                   const SizedBox(width: 8.0),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 4.0,
+                    ),
                     decoration: BoxDecoration(
                       color: _getRiskColor(lesson.riskLevel),
                       borderRadius: BorderRadius.circular(12.0),
@@ -470,7 +495,10 @@ class _LessonsListScreenState extends State<LessonsListScreen> {
                   ),
                   const SizedBox(width: 8.0),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 4.0,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.blue.withOpacity(0.8),
                       borderRadius: BorderRadius.circular(12.0),
@@ -502,11 +530,7 @@ class _LessonsListScreenState extends State<LessonsListScreen> {
                   ),
                   Row(
                     children: [
-                      Icon(
-                        Icons.list_alt,
-                        color: Colors.white60,
-                        size: 16.0,
-                      ),
+                      Icon(Icons.list_alt, color: Colors.white60, size: 16.0),
                       const SizedBox(width: 4.0),
                       Text(
                         '${lesson.keyPoints.length} key points',

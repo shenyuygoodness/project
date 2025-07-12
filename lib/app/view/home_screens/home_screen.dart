@@ -77,33 +77,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     );
   }
 
-  // Future<void> _logout() async {
-  //   setState(() {
-  //     _isLoggingOut = true;
-  //   });
-
-  //   try {
-  //     await _authService.signOut();
-
-  //     if (mounted) {
-  //       _showSnackBar('You have successfully logged out.');
-  //       Navigator.pushAndRemoveUntil(
-  //         context,
-  //         MaterialPageRoute(builder: (context) => const Login()),
-  //         (route) => false,
-  //       );
-  //     }
-  //   } catch (e) {
-  //     _showSnackBar('Failed to logout: ${e.toString()}', isError: true);
-  //   } finally {
-  //     if (mounted) {
-  //       setState(() {
-  //         _isLoggingOut = false;
-  //       });
-  //     }
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -470,7 +443,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                           borderRadius: BorderRadius.circular(8.r),
                         ),
                         child: Text(
-                          "New",
+                          "Learn More",
                           style: AppTextStyles.bodyRegular14.copyWith(
                             color: AppColors.white,
                             fontSize: 10.sp,
@@ -508,7 +481,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     ),
                     SizedBox(width: 4.w),
                     Text(
-                      "30 min",
+                      "real time",
                       style: AppTextStyles.bodyRegular14.copyWith(
                         color: AppColors.tertiary,
                         fontSize: 12.sp,

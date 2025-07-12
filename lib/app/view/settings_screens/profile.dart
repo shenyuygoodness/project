@@ -149,8 +149,10 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     } else {
       _showSnackBar('No user is currently signed in.', isError: true);
       if (mounted) {
-        Navigator.of(context).pushReplacement(
+        // Navigate to login and clear all previous routes
+        Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const Login()),
+          (route) => false,
         );
       }
     }
@@ -273,8 +275,10 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         await FirebaseAuth.instance.signOut();
         _showSnackBar('Successfully signed out!', isError: false);
         if (mounted) {
-          Navigator.of(context).pushReplacement(
+          // Use rootNavigator to bypass the bottom navigation and clear all routes
+          Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const Login()),
+            (route) => false,
           );
         }
       } on FirebaseAuthException catch (e) {
@@ -719,79 +723,6 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     );
   }
 
-  // Widget _buildStatsCard() {
-  //   return Container(
-  //     margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-  //     padding: EdgeInsets.all(20.w),
-  //     decoration: BoxDecoration(
-  //       color: AppColors.secondary,
-  //       borderRadius: BorderRadius.circular(16.r),
-  //       boxShadow: [
-  //         BoxShadow(
-  //           color: Colors.black.withOpacity(0.1),
-  //           blurRadius: 10,
-  //           offset: const Offset(0, 4),
-  //         ),
-  //       ],
-  //     ),
-  //     child: Row(
-  //       mainAxisAlignment: MainAxisAlignment.spaceAround,
-  //       children: [
-  //         _buildStatItem("Security Score", "92%", Icons.security),
-  //         Container(
-  //           width: 1.w,
-  //           height: 40.h,
-  //           color: AppColors.tertiary.withOpacity(0.3),
-  //         ),
-  //         _buildStatItem("Threats Blocked", "247", Icons.block),
-  //         Container(
-  //           width: 1.w,
-  //           height: 40.h,
-  //           color: AppColors.tertiary.withOpacity(0.3),
-  //         ),
-  //         _buildStatItem("Last Scan", "2h ago", Icons.schedule),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // Widget _buildStatItem(String label, String value, IconData icon) {
-  //   return Column(
-  //     children: [
-  //       Container(
-  //         padding: EdgeInsets.all(8.w),
-  //         decoration: BoxDecoration(
-  //           gradient: AppColors.greenGradient,
-  //           borderRadius: BorderRadius.circular(8.r),
-  //         ),
-  //         child: Icon(
-  //           icon,
-  //           color: AppColors.white,
-  //           size: 20.w,
-  //         ),
-  //       ),
-  //       SizedBox(height: 8.h),
-  //       Text(
-  //         value,
-  //         style: TextStyle(
-  //           fontSize: 16.sp,
-  //           fontWeight: FontWeight.w700,
-  //           color: AppColors.white,
-  //         ),
-  //       ),
-  //       SizedBox(height: 4.h),
-  //       Text(
-  //         label,
-  //         style: TextStyle(
-  //           fontSize: 10.sp,
-  //           color: AppColors.tertiary,
-  //         ),
-  //         textAlign: TextAlign.center,
-  //       ),
-  //     ],
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -875,9 +806,6 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                         children: [
                           // Profile Header
                           _buildProfileHeader(),
-                          
-                          // Stats Card
-                          // _buildStatsCard(),
                           
                           // Profile Form
                           _buildProfileForm(),

@@ -572,8 +572,8 @@ class _LessonGenerationScreenState extends State<LessonGenerationScreen> {
                 _buildChip('Risk: ${lesson.riskLevel}', 
                     lesson.riskLevel == 'high' ? Colors.red : 
                     lesson.riskLevel == 'medium' ? Colors.orange : Colors.green),
-                const SizedBox(width: 10),
-                _buildChip('Enhanced Intel', Colors.purple),
+                // const SizedBox(width: 10),
+                // _buildChip('Enhanced Intel', Colors.purple),
               ],
             ),
             const SizedBox(height: 15),
